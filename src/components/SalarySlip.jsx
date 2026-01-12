@@ -1,102 +1,69 @@
 import React from 'react';
 
-const SalarySlip = ({ payroll, onClose }) => {
-    if (!payroll) return null;
-
-    const { employeeId, salaryComponents, deductions, attendanceSummary, netSalary, month, year } = payroll;
-    const empName = employeeId ? `${employeeId.personal.firstName} ${employeeId.personal.lastName}` : 'Employee';
-    const empCode = employeeId?.professional?.employeeId || 'N/A';
+const SalarySlip = ({ salary, onClose }) => {
+    if (!salary) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl overflow-hidden">
-                <div className="bg-blue-600 px-6 py-4 flex justify-between items-center text-white">
-                    <h3 className="text-xl font-bold">Payslip: {new Date(year, month - 1).toLocaleString('default', { month: 'long' })} {year}</h3>
-                    <button onClick={onClose} className="text-white hover:text-gray-200 text-2xl">&times;</button>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white w-full max-w-2xl rounded-lg shadow-2xl overflow-hidden">
+
+                {/* Header */}
+                <div className="bg-blue-600 text-white p-6 flex justify-between items-center">
+                    <div>
+                        <h2 className="text-2xl font-bold">Salary Slip</h2>
+                        <p className="opacity-90">{salary.month} {salary.year}</p>
+                    </div>
+                    <button onClick={onClose} className="text-white hover:text-gray-200 text-xl font-bold">&times;</button>
                 </div>
 
+                {/* Body */}
                 <div className="p-8">
-                    {/* Header Details */}
-                    <div className="flex justify-between border-b pb-4 mb-6">
+                    <div className="grid grid-cols-2 gap-8 mb-8">
                         <div>
-                            <p className="text-sm text-gray-500 uppercase">Employee Name</p>
-                            <p className="font-semibold text-lg">{empName}</p>
+                            <p className="text-sm text-gray-500 uppercase tracking-wide">Employee</p>
+                            <p className="font-semibold text-lg">{salary.employeeId?.personal?.firstName} {salary.employeeId?.personal?.lastName}</p>
+                            <p className="text-gray-600">{salary.employeeId?.professional?.designation}</p>
                         </div>
                         <div className="text-right">
-                            <p className="text-sm text-gray-500 uppercase">Employee ID</p>
-                            <p className="font-semibold">{empCode}</p>
+                            <p className="text-sm text-gray-500 uppercase tracking-wide">Worked Days</p>
+                            <p className="font-semibold text-lg">{salary.workedDays} Days</p>
                         </div>
                     </div>
 
-                    {/* Attendance Summary */}
-                    <div className="mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100 flex justify-between text-sm text-gray-600">
-                        <div><span className="font-bold">Total Days:</span> {attendanceSummary.totalDays}</div>
-                        <div><span className="font-bold text-green-600">Paid Days:</span> {attendanceSummary.paidDays}</div>
-                        <div><span className="font-bold text-red-600">LOP Days:</span> {attendanceSummary.lopDays}</div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-8">
+                    <div className="grid grid-cols-2 gap-8 border-t border-b border-gray-200 py-6">
                         {/* Earnings */}
                         <div>
-                            <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b mb-3 pb-1">Earnings</h4>
-                            <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-                                <span>Basic Salary</span>
-                                <span>₹ {salaryComponents.base.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-                                <span>HRA</span>
-                                <span>₹ {salaryComponents.hra.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-                                <span>Conveyance</span>
-                                <span>₹ {salaryComponents.conveyance.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-                                <span>Special Allow.</span>
-                                <span>₹ {salaryComponents.specialAllowance.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between py-2 mt-2 font-bold text-gray-800">
-                                <span>Gross Earnings</span>
-                                <span>₹ {salaryComponents.grossSalary.toLocaleString()}</span>
+                            <h3 className="text-green-600 font-bold mb-4 uppercase text-sm">Earnings</h3>
+                            <div className="space-y-2">
+                                <div className="flex justify-between"><span>Basic Salary</span> <span>₹{salary.earnings.basic}</span></div>
+                                <div className="flex justify-between"><span>HRA</span> <span>₹{salary.earnings.hra}</span></div>
+                                <div className="flex justify-between"><span>Special Allow.</span> <span>₹{salary.earnings.specialAllowance || 0}</span></div>
+                                <div className="flex justify-between font-bold border-t pt-2 mt-2"><span>Gross Earnings</span> <span>₹{salary.earnings.gross}</span></div>
                             </div>
                         </div>
 
                         {/* Deductions */}
                         <div>
-                            <h4 className="text-sm font-bold text-gray-700 uppercase tracking-wide border-b mb-3 pb-1">Deductions</h4>
-                            <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-                                <span>Provident Fund</span>
-                                <span>₹ {deductions.pf.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-                                <span>ESI</span>
-                                <span>₹ {deductions.esi.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-                                <span>Prof. Tax</span>
-                                <span>₹ {deductions.pt.toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between py-1 border-b border-dashed border-gray-200">
-                                <span>TDS</span>
-                                <span>₹ {(deductions.tds || 0).toLocaleString()}</span>
-                            </div>
-                            <div className="flex justify-between py-2 mt-2 font-bold text-red-600">
-                                <span>Total Deductions</span>
-                                <span>₹ {deductions.totalDeductions.toLocaleString()}</span>
+                            <h3 className="text-red-500 font-bold mb-4 uppercase text-sm">Deductions</h3>
+                            <div className="space-y-2">
+                                <div className="flex justify-between"><span>Provident Fund</span> <span>₹{salary.deductions.pf}</span></div>
+                                <div className="flex justify-between"><span>ESI</span> <span>₹{salary.deductions.esi || 0}</span></div>
+                                <div className="flex justify-between"><span>Tax (TDS)</span> <span>₹{salary.deductions.tax || 0}</span></div>
+                                <div className="flex justify-between font-bold border-t pt-2 mt-2"><span>Total Deductions</span> <span>₹{salary.deductions.totalDeductions}</span></div>
                             </div>
                         </div>
                     </div>
 
                     {/* Net Pay */}
-                    <div className="mt-8 bg-blue-50 p-4 rounded-lg flex justify-between items-center border border-blue-100">
-                        <div className="text-blue-800 font-medium uppercase tracking-wider">Net Salary Payable</div>
-                        <div className="text-3xl font-bold text-blue-700">₹ {netSalary.toLocaleString()}</div>
+                    <div className="bg-blue-50 p-6 mt-6 rounded-lg flex justify-between items-center">
+                        <span className="text-blue-800 font-semibold uppercase tracking-wide">Net Payable</span>
+                        <span className="text-3xl font-bold text-blue-900">₹{salary.netPay}</span>
                     </div>
                 </div>
 
-                <div className="bg-gray-50 px-6 py-4 text-center">
-                    <button onClick={onClose} className="bg-white border border-gray-300 text-gray-700 px-6 py-2 rounded-md hover:bg-gray-100 font-medium">Close View</button>
-                    <button className="ml-3 bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-medium">Download PDF</button>
+                {/* Footer */}
+                <div className="bg-gray-50 p-4 text-center border-t">
+                    <p className="text-xs text-gray-400">Computer Generated Slip • Cyber Systems</p>
                 </div>
             </div>
         </div>
