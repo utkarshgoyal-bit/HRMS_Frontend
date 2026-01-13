@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Optional: Smooth scrolling for the whole app */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background-color: #f3f4f6;
+  @apply bg-slate-50 text-slate-800 antialiased;
 }
