@@ -7,6 +7,7 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
         firstName: '',
         lastName: '',
         email: '',
+        mobile: '', // <--- Added mobile field
         password: '',
         role: 'EMPLOYEE',
         salary: ''
@@ -33,9 +34,9 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
             );
 
             if (response.data.success) {
-                onSuccess(); // Refresh the parent
-                onClose();   // Close modal
-                setFormData({ firstName: '', lastName: '', email: '', password: '', role: 'EMPLOYEE', salary: '' }); // Reset
+                onSuccess();
+                onClose();
+                setFormData({ firstName: '', lastName: '', email: '', mobile: '', password: '', role: 'EMPLOYEE', salary: '' });
             }
         } catch (err) {
             console.error(err);
@@ -65,17 +66,23 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-xs font-medium text-slate-500 mb-1">First Name</label>
-                            <input name="firstName" value={formData.firstName} onChange={handleChange} required className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="John" />
+                            <input name="firstName" value={formData.firstName} onChange={handleChange} required className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Sarah" />
                         </div>
                         <div>
                             <label className="block text-xs font-medium text-slate-500 mb-1">Last Name</label>
-                            <input name="lastName" value={formData.lastName} onChange={handleChange} required className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Doe" />
+                            <input name="lastName" value={formData.lastName} onChange={handleChange} required className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="Smith" />
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-xs font-medium text-slate-500 mb-1">Email Address</label>
-                        <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="john.doe@company.com" />
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Email Address</label>
+                            <input type="email" name="email" value={formData.email} onChange={handleChange} required className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="sarah@demo.com" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-medium text-slate-500 mb-1">Mobile Number</label>
+                            <input type="tel" name="mobile" value={formData.mobile} onChange={handleChange} required className="w-full p-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" placeholder="9876543210" />
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
