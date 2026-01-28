@@ -42,6 +42,12 @@ const SuperAdminDashboard = () => {
             if (orgsRes.data.success) setOrganizations(orgsRes.data.data);
         } catch (err) {
             console.error('Error fetching data:', err);
+            // If token is invalid/expired (e.g. after DB reset), redirect to login
+            if (err.response && err.response.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/';
+            }
         } finally {
             setLoading(false);
         }
