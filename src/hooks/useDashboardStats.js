@@ -28,6 +28,13 @@ const useDashboardStats = () => {
                 }
             } catch (error) {
                 console.error("Dashboard Sync Failed:", error);
+
+                if (error.response && error.response.status === 401) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    window.location.href = '/';
+                }
+
                 setStats(prev => ({ ...prev, loading: false }));
             }
         };

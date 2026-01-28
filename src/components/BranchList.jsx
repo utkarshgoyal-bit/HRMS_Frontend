@@ -36,6 +36,12 @@ const BranchList = () => {
             }
         } catch (err) {
             console.error(err);
+            if (err.response && err.response.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/';
+                return;
+            }
             setError('Failed to load branches');
         } finally {
             setLoading(false);
@@ -190,8 +196,8 @@ const BranchRow = ({ branch, isRoot, isAdmin, onDelete }) => {
             <div className="flex items-center gap-4">
                 {/* Icon */}
                 <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${isRoot
-                        ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
-                        : 'bg-slate-100 text-slate-500'
+                    ? 'bg-gradient-to-br from-emerald-500 to-teal-600 text-white'
+                    : 'bg-slate-100 text-slate-500'
                     }`}>
                     {isRoot ? <Building2 size={20} /> : <GitBranch size={18} />}
                 </div>
@@ -206,8 +212,8 @@ const BranchRow = ({ branch, isRoot, isAdmin, onDelete }) => {
                             </span>
                         )}
                         <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${branch.status === 'Active'
-                                ? 'bg-green-100 text-green-700'
-                                : 'bg-slate-100 text-slate-500'
+                            ? 'bg-green-100 text-green-700'
+                            : 'bg-slate-100 text-slate-500'
                             }`}>
                             {branch.status}
                         </span>

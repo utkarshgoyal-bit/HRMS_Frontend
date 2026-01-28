@@ -35,6 +35,12 @@ const EmployeeList = () => {
             }
         } catch (err) {
             console.error(err);
+            if (err.response && err.response.status === 401) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('user');
+                window.location.href = '/';
+                return;
+            }
             setError('Failed to load employees');
         } finally {
             setLoading(false);
@@ -172,8 +178,8 @@ const EmployeeList = () => {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${emp.status === 'Active'
-                                                    ? 'bg-green-100 text-green-700'
-                                                    : 'bg-slate-100 text-slate-600'
+                                                ? 'bg-green-100 text-green-700'
+                                                : 'bg-slate-100 text-slate-600'
                                                 }`}>
                                                 {emp.status}
                                             </span>
