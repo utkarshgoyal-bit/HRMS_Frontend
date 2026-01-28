@@ -40,8 +40,14 @@ const Login = () => {
                     localStorage.setItem('orgSlug', user.organization.slug);
                 }
 
-                console.log('✅ Login successful, navigating to dashboard...');
-                navigate('/dashboard');
+                console.log('✅ Login successful, user role:', user.role);
+
+                // Redirect based on role
+                if (user.role === 'SUPER_ADMIN') {
+                    navigate('/super-admin');
+                } else {
+                    navigate('/dashboard');
+                }
             }
         } catch (err) {
             console.error("Login Error:", err);
