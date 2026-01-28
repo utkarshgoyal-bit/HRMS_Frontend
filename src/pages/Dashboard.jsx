@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import MainLayout from '../layouts/MainLayout';
 import { Users, Building2, Activity, Database } from 'lucide-react';
-import useDashboardStats from '../hooks/useDashboardStats'; // <--- The Connector
+import useDashboardStats from '../hooks/useDashboardStats';
 import AddEmployeeModal from '../components/AddEmployeeModal';
+import EmployeeList from '../components/EmployeeList';
 
 const StatCard = ({ title, value, color, icon, subtext }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-start justify-between">
@@ -18,24 +19,19 @@ const StatCard = ({ title, value, color, icon, subtext }) => (
 );
 
 const Dashboard = () => {
-    // Use the real data!
     const { employeeCount, orgCount, dbStatus, loading } = useDashboardStats();
     const isConnected = dbStatus === 'Connected';
-
-    // Modal state
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [refreshKey, setRefreshKey] = useState(0);
 
-    // Refresh stats after adding employee
     const handleEmployeeAdded = () => {
-        window.location.reload(); // Simple refresh to update counts
+        setRefreshKey(prev => prev + 1);
     };
 
     return (
         <MainLayout>
             <div className="mb-8 flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-slate-800">Overview</h1>
-
-                {/* Add Employee Button */}
                 <button
                     onClick={() => setIsModalOpen(true)}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-md shadow-blue-500/20 flex items-center gap-2"
@@ -45,8 +41,7 @@ const Dashboard = () => {
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                {/* Real Employee Count */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                 <StatCard
                     title="Total Employees"
                     value={loading ? "..." : employeeCount}
@@ -54,8 +49,6 @@ const Dashboard = () => {
                     icon={<Users size={22} />}
                     subtext="Active in Database"
                 />
-
-                {/* Real Org Count */}
                 <StatCard
                     title="Organizations"
                     value={loading ? "..." : orgCount}
@@ -63,8 +56,6 @@ const Dashboard = () => {
                     icon={<Building2 size={22} />}
                     subtext="Registered Tenants"
                 />
-
-                {/* Real DB Status */}
                 <StatCard
                     title="System Health"
                     value={loading ? "..." : (isConnected ? "100%" : "Offline")}
@@ -73,6 +64,9 @@ const Dashboard = () => {
                     subtext="Operational"
                 />
             </div>
+
+            {/* Employee List with Role Assignment */}
+            <EmployeeList key={refreshKey} />
 
             {/* Add Employee Modal */}
             <AddEmployeeModal
