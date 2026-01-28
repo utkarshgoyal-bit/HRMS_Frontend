@@ -4,6 +4,7 @@ import { Users, Building2, Activity, Database } from 'lucide-react';
 import useDashboardStats from '../hooks/useDashboardStats';
 import AddEmployeeModal from '../components/AddEmployeeModal';
 import EmployeeList from '../components/EmployeeList';
+import BranchList from '../components/BranchList';
 
 const StatCard = ({ title, value, color, icon, subtext }) => (
     <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-start justify-between">
@@ -65,8 +66,13 @@ const Dashboard = () => {
                 />
             </div>
 
+            {/* Branch List */}
+            <div className="mb-8">
+                <BranchList key={`branch-${refreshKey}`} />
+            </div>
+
             {/* Employee List with Role Assignment */}
-            <EmployeeList key={refreshKey} />
+            <EmployeeList key={`emp-${refreshKey}`} />
 
             {/* Add Employee Modal */}
             <AddEmployeeModal

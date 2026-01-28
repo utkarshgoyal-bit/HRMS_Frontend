@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Users, Shield, Mail, Phone, MoreVertical, RefreshCw } from 'lucide-react';
+import { Users, Shield, Mail, Phone, RefreshCw } from 'lucide-react';
 import RoleAssignmentModal from './RoleAssignmentModal';
 
 const EmployeeList = () => {
@@ -9,6 +9,7 @@ const EmployeeList = () => {
     const [error, setError] = useState('');
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
+    const [currentUserRole, setCurrentUserRole] = useState(null);
 
     const fetchEmployees = async () => {
         setLoading(true);
@@ -19,6 +20,18 @@ const EmployeeList = () => {
             });
             if (response.data.success) {
                 setEmployees(response.data.data);
+
+                // Get current user's role from token (decode JWT)
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    // Find current user in employees list to get their role
+                    const currentUser = response.data.data.find(emp => emp._id === payload.id);
+                    if (currentUser) {
+                        setCurrentUserRole(currentUser.professional?.role);
+                    }
+                } catch (e) {
+                    console.log('Could not decode token');
+                }
             }
         } catch (err) {
             console.error(err);
@@ -31,6 +44,9 @@ const EmployeeList = () => {
     useEffect(() => {
         fetchEmployees();
     }, []);
+
+    // Check if current user is an admin
+    const isAdmin = currentUserRole === 'ORG_ADMIN' || currentUserRole === 'SUPER_ADMIN';
 
     const getRoleBadge = (role) => {
         const styles = {
@@ -116,7 +132,9 @@ const EmployeeList = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Contact</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Role</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
-                                    <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                                    {isAdmin && (
+                                        <th className="px-6 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                                    )}
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-100">
@@ -160,15 +178,17 @@ const EmployeeList = () => {
                                                 {emp.status}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <button
-                                                onClick={() => openRoleModal(emp)}
-                                                className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
-                                            >
-                                                <Shield size={14} />
-                                                Assign Role
-                                            </button>
-                                        </td>
+                                        {isAdmin && (
+                                            <td className="px-6 py-4 text-right">
+                                                <button
+                                                    onClick={() => openRoleModal(emp)}
+                                                    className="inline-flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
+                                                >
+                                                    <Shield size={14} />
+                                                    Assign Role
+                                                </button>
+                                            </td>
+                                        )}
                                     </tr>
                                 ))}
                             </tbody>
