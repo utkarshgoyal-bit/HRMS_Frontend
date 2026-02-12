@@ -67,9 +67,18 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
         setLoading(true);
         setError('');
 
+        // Basic Validation
+        if (!formData.firstName || !formData.lastName || !formData.email || !formData.mobile) {
+            setError('Please fill in all required fields (First Name, Last Name, Email, Mobile)');
+            setLoading(false);
+            return;
+        }
+
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post('http://127.0.0.1:9999/api/v1/employees',
+            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+
+            const response = await axios.post(`${API_URL}/api/v1/employees`,
                 formData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
@@ -323,8 +332,8 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
                                 key={section.id}
                                 onClick={() => setCurrentSection(section.id)}
                                 className={`flex-1 py-3 px-2 text-xs font-medium flex flex-col items-center gap-1 transition-all border-b-2 ${currentSection === section.id
-                                        ? 'border-blue-600 text-blue-600 bg-white'
-                                        : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100'
+                                    ? 'border-blue-600 text-blue-600 bg-white'
+                                    : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-100'
                                     }`}
                             >
                                 <Icon size={16} />
@@ -355,8 +364,8 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
                             onClick={prevSection}
                             disabled={currentSection === 0}
                             className={`flex items-center px-4 py-2 rounded-lg font-medium text-sm transition-all ${currentSection === 0
-                                    ? 'text-slate-300 cursor-not-allowed'
-                                    : 'text-slate-600 hover:bg-slate-200'
+                                ? 'text-slate-300 cursor-not-allowed'
+                                : 'text-slate-600 hover:bg-slate-200'
                                 }`}
                         >
                             <ChevronLeft size={18} className="mr-1" /> Previous
