@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Users, Shield, Mail, Phone, RefreshCw, Search, MoreVertical, Filter, Plus } from 'lucide-react';
+import { Users, Shield, Mail, Phone, RefreshCw, Search, MoreVertical, Filter, Plus, Trash2, Edit2 } from 'lucide-react';
 import RoleAssignmentModal from './RoleAssignmentModal';
 import AddEmployeeModal from './AddEmployeeModal';
+import EditEmployeeModal from './EditEmployeeModal';
 
 const EmployeeList = () => {
     const [employees, setEmployees] = useState([]);
@@ -15,6 +16,7 @@ const EmployeeList = () => {
     const [selectedEmployee, setSelectedEmployee] = useState(null);
     const [isRoleModalOpen, setIsRoleModalOpen] = useState(false);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
     const [currentUserRole, setCurrentUserRole] = useState(null);
 
@@ -100,6 +102,25 @@ const EmployeeList = () => {
 
     const handleRoleUpdated = () => {
         fetchEmployees();
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm('Are you sure you want to delete this employee? This action cannot be undone.')) return;
+        try {
+            const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            await axios.delete(`${API_URL}/api/v1/employees/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchEmployees();
+        } catch (err) {
+            alert('Failed to delete employee: ' + (err.response?.data?.message || err.message));
+        }
+    };
+
+    const openEditModal = (employee) => {
+        setSelectedEmployee(employee);
+        setIsEditModalOpen(true);
     };
 
     if (loading) {
@@ -236,8 +257,15 @@ const EmployeeList = () => {
                                                         <Shield size={16} />
                                                     </button>
                                                 )}
-                                                <button className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors">
-                                                    <MoreVertical size={16} />
+                                                <button
+                                                    onClick={() => openEditModal(emp)}
+                                                    className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Details">
+                                                    <Edit2 size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => handleDelete(emp._id)}
+                                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Delete Employee">
+                                                    <Trash2 size={16} />
                                                 </button>
                                             </div>
                                         </td>
@@ -262,6 +290,16 @@ const EmployeeList = () => {
                 onClose={() => setIsAddModalOpen(false)}
                 onSuccess={() => {
                     setIsAddModalOpen(false);
+                    fetchEmployees();
+                }}
+            />
+
+            <EditEmployeeModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                employee={selectedEmployee}
+                onSuccess={() => {
+                    setIsEditModalOpen(false);
                     fetchEmployees();
                 }}
             />

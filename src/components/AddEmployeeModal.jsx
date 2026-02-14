@@ -1,11 +1,33 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { X, UserPlus, Save, AlertCircle, User, Phone, Briefcase, FileText, CreditCard, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
     const [currentSection, setCurrentSection] = useState(0);
     const [loading, setLoading] = useState(false);
+    const [branches, setBranches] = useState([]);
     const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (isOpen) {
+            fetchBranches();
+        }
+    }, [isOpen]);
+
+    const fetchBranches = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const res = await axios.get(`${API_URL}/api/v1/branches`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                setBranches(res.data.data);
+            }
+        } catch (err) {
+            console.error('Failed to fetch branches', err);
+        }
+    };
 
     const [formData, setFormData] = useState({
         // Personal Details
@@ -28,6 +50,7 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
         designation: '',
         joiningDate: '',
         status: 'Active',
+        branchId: '',
         // Documents
         aadhar: '',
         pan: '',
@@ -64,12 +87,26 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        // If not on the last section, treat submit (Enter key) as "Next"
+        if (currentSection < sections.length - 1) {
+            nextSection();
+            return;
+        }
+
         setLoading(true);
         setError('');
 
         // Basic Validation
         if (!formData.firstName || !formData.lastName || !formData.email || !formData.mobile) {
             setError('Please fill in all required fields (First Name, Last Name, Email, Mobile)');
+            setLoading(false);
+            return;
+        }
+
+        // Validate Base Salary
+        if (!formData.baseSalary || formData.baseSalary <= 0) {
+            setError('Base Salary is required and must be greater than 0');
             setLoading(false);
             return;
         }
@@ -90,7 +127,7 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
                 setFormData({
                     firstName: '', lastName: '', dob: '', gender: '', maritalStatus: '', qualification: '',
                     email: '', mobile: '', password: '', addressLine1: '', addressLine2: '', country: '', state: '',
-                    role: 'EMPLOYEE', designation: '', joiningDate: '', status: 'Active',
+                    role: 'EMPLOYEE', designation: '', joiningDate: '', status: 'Active', branchId: '',
                     aadhar: '', pan: '', passport: '', voterID: '', drivingLicense: '',
                     baseSalary: '', hra: '', conveyance: '', incentive: '', commission: '', ledgerBalance: '',
                     accountNumber: '', accountName: '', ifsc: '', bankName: ''
@@ -217,6 +254,16 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
                     <option value="Terminated">Terminated</option>
                 </select>
             </div>
+            <div className="col-span-2">
+                <label className={labelClass}>Branch Assignment *</label>
+                <select name="branchId" value={formData.branchId} onChange={handleChange} required className={inputClass}>
+                    <option value="">-- Select Branch --</option>
+                    {branches.map(b => (
+                        <option key={b._id} value={b._id}>{b.name} ({b.address?.city || 'Main'})</option>
+                    ))}
+                </select>
+                <p className="text-[10px] text-slate-400 mt-1">Required for Attendance & Payroll</p>
+            </div>
         </div>
     );
 
@@ -250,8 +297,8 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
             <h4 className="text-sm font-semibold text-slate-700 border-b pb-2">Salary Components</h4>
             <div className="grid grid-cols-3 gap-4">
                 <div>
-                    <label className={labelClass}>Base Salary</label>
-                    <input type="number" name="baseSalary" value={formData.baseSalary} onChange={handleChange} className={inputClass} placeholder="Enter base salary" />
+                    <label className={labelClass}>Base Salary *</label>
+                    <input type="number" name="baseSalary" value={formData.baseSalary} onChange={handleChange} required className={inputClass} placeholder="Enter base salary" min="1" />
                 </div>
                 <div>
                     <label className={labelClass}>HRA</label>
@@ -330,6 +377,7 @@ const AddEmployeeModal = ({ isOpen, onClose, onSuccess }) => {
                         return (
                             <button
                                 key={section.id}
+                                type="button"
                                 onClick={() => setCurrentSection(section.id)}
                                 className={`flex-1 py-3 px-2 text-xs font-medium flex flex-col items-center gap-1 transition-all border-b-2 ${currentSection === section.id
                                     ? 'border-blue-600 text-blue-600 bg-white'

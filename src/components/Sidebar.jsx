@@ -17,6 +17,7 @@ const Sidebar = () => {
         { name: 'Dashboard', icon: <LayoutDashboard size={20} />, path: '/dashboard' },
         { name: 'Employees', icon: <Users size={20} />, path: '/employees' },
         { name: 'Payroll', icon: <Banknote size={20} />, path: '/payroll' },
+        { name: 'Attendance', icon: <CalendarCheck size={20} />, path: '/attendance' },
         { name: 'Settings', icon: <Settings size={20} />, path: '/settings' },
     ];
 

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '../layouts/MainLayout';
-import { User, Lock, Bell, Save, Shield, Mail, Key, Banknote, ToggleLeft, ToggleRight, Plus, Trash2, AlertTriangle } from 'lucide-react';
+import { User, Lock, Bell, Save, Shield, Mail, Key, Banknote, ToggleLeft, ToggleRight, Plus, Trash2, AlertTriangle, Building } from 'lucide-react';
 import axios from 'axios';
+import BranchManager from '../components/BranchManager';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
 
@@ -114,6 +115,7 @@ const Settings = () => {
                             { id: 'security', label: 'Security', icon: Lock },
                             { id: 'notifications', label: 'Notifications', icon: Bell },
                             { id: 'payroll', label: 'Payroll Config', icon: Banknote },
+                            { id: 'branches', label: 'Branches', icon: Building },
                         ].map(tab => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
                                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id ? 'bg-violet-50 text-violet-700 shadow-sm' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
@@ -326,6 +328,13 @@ const Settings = () => {
                                     </div>
                                 ) : <div className="text-center py-12 text-red-500">Failed to load configuration.</div>}
                             </div>
+                        </div>
+                    )}
+
+                    {/* === BRANCHES === */}
+                    {activeTab === 'branches' && (
+                        <div className="glass rounded-2xl p-8 animate-fade-in-up">
+                            <BranchManager />
                         </div>
                     )}
                 </div>
