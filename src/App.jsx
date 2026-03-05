@@ -8,6 +8,7 @@ import Settings from './pages/Settings';
 import Employees from './pages/Employees';
 import Attendance from './pages/Attendance';
 import QRScan from './pages/QRScan';
+import BranchQRDisplay from './pages/BranchQRDisplay';
 
 function App() {
   return (
@@ -28,6 +29,9 @@ function App() {
 
         {/* Public QR Scan Page */}
         <Route path="/scan/:token" element={<QRScan />} />
+
+        {/* Kiosk QR Display Page */}
+        <Route path="/branch-qr" element={<BranchQRDisplay />} />
 
         {/* Redirect unknown paths to Login */}
         <Route path="*" element={<Navigate to="/" />} />

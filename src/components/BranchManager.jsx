@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { MapPin, Building, Plus, Edit2, Trash2, Save, X, RefreshCw, Navigation } from 'lucide-react';
+import { MapPin, Building, Plus, Edit2, Trash2, Save, X, RefreshCw, Navigation, Key, Check, Copy, AlertCircle } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
 
@@ -9,6 +9,11 @@ const BranchManager = () => {
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingBranch, setEditingBranch] = useState(null);
+
+    // Credentials State
+    const [credentialsModal, setCredentialsModal] = useState({ isOpen: false, branchId: null, branchName: '', username: '', password: '' });
+    const [generatingCreds, setGeneratingCreds] = useState(false);
+    const [copied, setCopied] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -84,22 +89,33 @@ const BranchManager = () => {
             const payload = { ...formData };
 
             // Adjust payload for backend expectations
-            // If isRoot is true, parentBranch should be null/undefined logic handled by backend? 
-            // Backend Controller says: if (isRoot) parentBranch = null. So sending empty string might be issue if not handled.
             if (payload.isRoot) payload.parentBranch = null;
 
+            let res;
             if (editingBranch) {
-                await axios.put(`${API_URL}/api/v1/branches/${editingBranch._id}`, payload, {
+                res = await axios.put(`${API_URL}/api/v1/branches/${editingBranch._id}`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             } else {
-                await axios.post(`${API_URL}/api/v1/branches`, payload, {
+                res = await axios.post(`${API_URL}/api/v1/branches`, payload, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
             }
             setIsModalOpen(false);
             setEditingBranch(null);
             fetchBranches();
+
+            // If it was a creation and we got credentials back, show them
+            if (!editingBranch && res.data.credentials) {
+                setCredentialsModal({
+                    isOpen: true,
+                    branchId: res.data.data._id,
+                    branchName: res.data.data.name,
+                    username: res.data.credentials.username,
+                    password: res.data.credentials.password
+                });
+            }
+
         } catch (err) {
             alert('Operation failed: ' + (err.response?.data?.message || err.message));
         }
@@ -142,6 +158,34 @@ const BranchManager = () => {
         setEditingBranch(null);
     };
 
+    const handleGenerateCredentials = async (branchId) => {
+        if (!window.confirm("Warning: Generating new credentials will immediately invalidate the old password. Continue?")) return;
+        setGeneratingCreds(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.post(`${API_URL}/api/v1/branches/${branchId}/credentials/generate`, {}, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.data.success) {
+                setCredentialsModal(prev => ({
+                    ...prev,
+                    username: res.data.data.username,
+                    password: res.data.data.password
+                }));
+            }
+        } catch (err) {
+            alert('Failed to generate credentials: ' + (err.response?.data?.message || err.message));
+        } finally {
+            setGeneratingCreds(false);
+        }
+    };
+
+    const copyToClipboard = (text) => {
+        navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
     return (
         <div className="animate-fade-in-up space-y-6">
             <div className="flex items-center justify-between">
@@ -181,12 +225,17 @@ const BranchManager = () => {
                                     </div>
                                 </div>
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button onClick={() => handleEdit(branch)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded"><Edit2 size={16} /></button>
-                                    <button onClick={() => handleDelete(branch._id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded"><Trash2 size={16} /></button>
+                                    <button onClick={() => setCredentialsModal({ isOpen: true, branchId: branch._id, branchName: branch.name, username: branch.username || 'Not Generated', password: '' })} className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded" title="Manage Credentials"><Key size={16} /></button>
+                                    <button onClick={() => handleEdit(branch)} className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Edit"><Edit2 size={16} /></button>
+                                    <button onClick={() => handleDelete(branch._id)} className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded" title="Delete"><Trash2 size={16} /></button>
                                 </div>
                             </div>
 
                             <div className="space-y-2 text-sm text-slate-600">
+                                <div className="flex items-center gap-2 text-xs font-mono text-slate-500 bg-slate-50 p-1.5 rounded-md mb-2">
+                                    <Key size={12} className="text-slate-400 shrink-0" />
+                                    <span>ID: {branch.username || 'Not configured'}</span>
+                                </div>
                                 <div className="flex items-start gap-2">
                                     <MapPin size={14} className="mt-1 text-slate-400 shrink-0" />
                                     <p>{branch.address?.complete || 'No address'}, {branch.address?.city}</p>
@@ -200,6 +249,69 @@ const BranchManager = () => {
                             </div>
                         </div>
                     ))}
+                </div>
+            )}
+
+            {/* Credentials Modal */}
+            {credentialsModal.isOpen && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up">
+                        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                            <div>
+                                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2"><Key size={18} className="text-amber-500" /> Branch Login Credentials</h3>
+                                <p className="text-xs text-slate-500 font-medium">{credentialsModal.branchName}</p>
+                            </div>
+                            <button onClick={() => setCredentialsModal({ isOpen: false, branchId: null, branchName: '', username: '', password: '' })} className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-200 rounded-full transition-colors"><X size={20} /></button>
+                        </div>
+
+                        <div className="p-6 space-y-6">
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Username</label>
+                                    <div className="flex items-center p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                                        <code className="text-sm font-bold text-slate-700 font-mono grow">{credentialsModal.username}</code>
+                                        <button onClick={() => copyToClipboard(credentialsModal.username)} className="p-1.5 text-slate-400 hover:text-blue-600 transition-colors">
+                                            {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {credentialsModal.password ? (
+                                    <div className="animate-fade-in">
+                                        <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block flex items-center justify-between">
+                                            <span>Password</span>
+                                            <span className="text-[10px] text-amber-600 bg-amber-100 px-2 py-0.5 rounded-full font-bold">Only shown once!</span>
+                                        </label>
+                                        <div className="flex items-center p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                                            <code className="text-sm font-bold text-amber-800 font-mono grow tracking-wide">{credentialsModal.password}</code>
+                                            <button onClick={() => copyToClipboard(credentialsModal.password)} className="p-1.5 text-amber-600 hover:text-amber-800 transition-colors">
+                                                {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                                            </button>
+                                        </div>
+                                        <p className="text-xs text-slate-500 mt-2 flex items-start gap-1">
+                                            <AlertCircle size={12} className="shrink-0 mt-0.5 text-amber-500" />
+                                            Make sure to securely copy this password now. It is hashed in the database and cannot be retrieved later.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl text-center">
+                                        <p className="text-sm text-slate-500 mb-3">Password is hidden for security.</p>
+                                        <button
+                                            onClick={() => handleGenerateCredentials(credentialsModal.branchId)}
+                                            disabled={generatingCreds}
+                                            className="w-full flex items-center justify-center gap-2 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-50"
+                                        >
+                                            {generatingCreds ? <RefreshCw size={16} className="animate-spin" /> : <RefreshCw size={16} />}
+                                            Generate New Password
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="p-4 bg-slate-50 border-t border-slate-100 flex justify-end">
+                            <button onClick={() => setCredentialsModal({ isOpen: false, branchId: null, branchName: '', username: '', password: '' })} className="px-5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-bold shadow-sm transition-colors">Close</button>
+                        </div>
+                    </div>
                 </div>
             )}
 

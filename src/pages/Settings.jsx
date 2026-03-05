@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MainLayout from '../layouts/MainLayout';
-import { User, Lock, Bell, Save, Shield, Mail, Key, Banknote, ToggleLeft, ToggleRight, Plus, Trash2, AlertTriangle, Building } from 'lucide-react';
+import { User, Lock, Bell, Save, Shield, Mail, Key, Banknote, ToggleLeft, ToggleRight, Plus, Trash2, AlertTriangle, Building, QrCode, MapPin, Clock, CheckCircle } from 'lucide-react';
 import axios from 'axios';
 import BranchManager from '../components/BranchManager';
 
@@ -40,9 +40,39 @@ const Settings = () => {
     const [config, setConfig] = useState(null);
     const [configLoading, setConfigLoading] = useState(false);
 
+    // Attendance & QR Settings
+    const [orgSettings, setOrgSettings] = useState(null);
+    const [orgSettingsLoading, setOrgSettingsLoading] = useState(false);
+    const [orgSettingsSaveMsg, setOrgSettingsSaveMsg] = useState('');
+
     useEffect(() => {
         if (activeTab === 'payroll') fetchConfig();
+        if (activeTab === 'attendance') fetchOrgSettings();
     }, [activeTab]);
+
+    const fetchOrgSettings = async () => {
+        setOrgSettingsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.get(`${API_URL}/api/v1/org/settings`, { headers: { Authorization: `Bearer ${token}` } });
+            if (res.data.success) setOrgSettings(res.data.data);
+        } catch (err) { console.error('Failed to fetch org settings:', err); }
+        finally { setOrgSettingsLoading(false); }
+    };
+
+    const saveOrgSettings = async () => {
+        setLoading(true); setOrgSettingsSaveMsg('');
+        try {
+            const token = localStorage.getItem('token');
+            const res = await axios.put(`${API_URL}/api/v1/org/settings`, orgSettings, { headers: { Authorization: `Bearer ${token}` } });
+            if (res.data.success) {
+                setOrgSettings(res.data.data);
+                setOrgSettingsSaveMsg('Settings saved successfully!');
+                setTimeout(() => setOrgSettingsSaveMsg(''), 3000);
+            }
+        } catch (err) { setOrgSettingsSaveMsg('Failed to save: ' + (err.response?.data?.message || err.message)); }
+        finally { setLoading(false); }
+    };
 
     const fetchConfig = async () => {
         setConfigLoading(true);
@@ -115,6 +145,7 @@ const Settings = () => {
                             { id: 'security', label: 'Security', icon: Lock },
                             { id: 'notifications', label: 'Notifications', icon: Bell },
                             { id: 'payroll', label: 'Payroll Config', icon: Banknote },
+                            { id: 'attendance', label: 'Attendance & QR', icon: QrCode },
                             { id: 'branches', label: 'Branches', icon: Building },
                         ].map(tab => (
                             <button key={tab.id} onClick={() => setActiveTab(tab.id)}
@@ -328,6 +359,123 @@ const Settings = () => {
                                     </div>
                                 ) : <div className="text-center py-12 text-red-500">Failed to load configuration.</div>}
                             </div>
+                        </div>
+                    )}
+
+                    {/* === ATTENDANCE & QR SETTINGS === */}
+                    {activeTab === 'attendance' && (
+                        <div className="glass rounded-2xl p-8 animate-fade-in-up space-y-6">
+                            <div>
+                                <h3 className="text-xl font-bold text-slate-800 mb-1 flex items-center gap-2"><QrCode size={20} className="text-violet-500" />Attendance & QR Settings</h3>
+                                <p className="text-sm text-slate-500">Configure QR code refresh rates and geo-fencing for your organization.</p>
+                            </div>
+
+                            {orgSettingsLoading ? (
+                                <div className="text-center py-12 text-slate-400">Loading settings...</div>
+                            ) : orgSettings ? (
+                                <div className="space-y-6">
+                                    {/* QR Refresh Interval */}
+                                    <div className="p-6 bg-violet-50/60 rounded-2xl border border-violet-100">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <Clock size={18} className="text-violet-500" />
+                                            <h4 className="font-bold text-slate-800">QR Code Refresh Rate</h4>
+                                        </div>
+                                        <p className="text-xs text-slate-500 mb-4">How frequently the attendance QR code rotates for security. Higher value = more stable; Lower value = more secure.</p>
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            {[60, 120, 300, 600].map(val => (
+                                                <button key={val}
+                                                    onClick={() => setOrgSettings(p => ({ ...p, qr_refresh_interval: val }))}
+                                                    className={`py-3 px-4 rounded-xl text-sm font-bold transition-all border-2 ${orgSettings.qr_refresh_interval === val
+                                                            ? 'bg-violet-600 text-white border-violet-600 shadow-lg shadow-violet-500/20'
+                                                            : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
+                                                        }`}>
+                                                    {val < 60 ? `${val}s` : `${val / 60} min`}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="mt-4">
+                                            <label className="text-xs font-medium text-slate-500">Custom interval (seconds)</label>
+                                            <div className="flex items-center gap-2 mt-1">
+                                                <input type="number" min="60" value={orgSettings.qr_refresh_interval}
+                                                    onChange={e => setOrgSettings(p => ({ ...p, qr_refresh_interval: parseInt(e.target.value) || 300 }))}
+                                                    className="w-32 p-2.5 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-violet-500 outline-none text-sm font-mono"
+                                                />
+                                                <span className="text-sm text-slate-500">seconds</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Geo-fence */}
+                                    <div className="p-6 bg-emerald-50/60 rounded-2xl border border-emerald-100">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div className="flex items-center gap-2">
+                                                <MapPin size={18} className="text-emerald-500" />
+                                                <h4 className="font-bold text-slate-800">Geo-Fencing</h4>
+                                            </div>
+                                            <Toggle
+                                                enabled={orgSettings.require_geo_validation}
+                                                onToggle={() => setOrgSettings(p => ({ ...p, require_geo_validation: !p.require_geo_validation }))}
+                                                label=""
+                                            />
+                                        </div>
+                                        <p className="text-xs text-slate-500 mb-4">Require employees to be within a radius of the branch GPS location to check in. Branch GPS must be set in Branches settings.</p>
+                                        {orgSettings.require_geo_validation && (
+                                            <ConfigInput
+                                                label="Allowed Radius (meters)"
+                                                value={orgSettings.geo_fence_radius}
+                                                onChange={v => setOrgSettings(p => ({ ...p, geo_fence_radius: v }))}
+                                                suffix="m"
+                                                hint="Employees must be within this distance of the branch to scan."
+                                            />
+                                        )}
+                                    </div>
+
+                                    {/* Attendance Approval */}
+                                    <div className="p-6 bg-amber-50/60 rounded-2xl border border-amber-100">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <CheckCircle size={18} className="text-amber-500" />
+                                            <h4 className="font-bold text-slate-800">Attendance Approval Mode</h4>
+                                        </div>
+                                        <p className="text-xs text-slate-500 mb-4">Choose how attendance check-ins from QR scans are approved.</p>
+                                        <div className="flex gap-3">
+                                            {['auto', 'role'].map(mode => (
+                                                <button key={mode}
+                                                    onClick={() => setOrgSettings(p => ({ ...p, attendance_approver: { ...p.attendance_approver, mode } }))}
+                                                    className={`px-5 py-2.5 rounded-xl text-sm font-bold capitalize transition-all border-2 ${orgSettings.attendance_approver?.mode === mode
+                                                            ? 'bg-amber-500 text-white border-amber-500'
+                                                            : 'bg-white text-slate-600 border-slate-200 hover:border-amber-300'
+                                                        }`}>
+                                                    {mode === 'auto' ? '⚡ Auto-Approve' : '👤 Manual (HR/Manager)'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {orgSettings.attendance_approver?.mode === 'role' && (
+                                            <div className="mt-4">
+                                                <label className="text-xs font-medium text-slate-500">Who can approve?</label>
+                                                <select
+                                                    value={orgSettings.attendance_approver?.role || 'HR_ADMIN'}
+                                                    onChange={e => setOrgSettings(p => ({ ...p, attendance_approver: { ...p.attendance_approver, role: e.target.value } }))}
+                                                    className="mt-1 p-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                                                    <option value="HR_ADMIN">HR Admin</option>
+                                                    <option value="MANAGER">Manager</option>
+                                                    <option value="ORG_ADMIN">Org Admin</option>
+                                                </select>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Save */}
+                                    <div className="flex items-center justify-between pt-4 border-t border-slate-100">
+                                        {orgSettingsSaveMsg && <p className={`text-sm font-medium ${orgSettingsSaveMsg.includes('success') ? 'text-emerald-600' : 'text-red-600'}`}>{orgSettingsSaveMsg}</p>}
+                                        <button onClick={saveOrgSettings} disabled={loading}
+                                            className="ml-auto flex items-center gap-2 px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg shadow-lg shadow-violet-500/20 transition-all active:scale-95">
+                                            {loading ? 'Saving...' : <><Save size={18} /> Save QR Settings</>}
+                                        </button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-center py-12 text-red-500">Failed to load settings.</div>
+                            )}
                         </div>
                     )}
 

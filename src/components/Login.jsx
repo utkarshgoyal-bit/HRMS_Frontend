@@ -6,8 +6,8 @@ import { Lock, Mail, AlertCircle } from 'lucide-react';
 const Login = () => {
     // 1. Remove organizationId from state
     const [formData, setFormData] = useState({
-        email: 'admin@demo.com',
-        password: 'password123'
+        email: '',
+        password: ''
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -45,6 +45,8 @@ const Login = () => {
                 // Redirect based on role
                 if (user.role === 'SUPER_ADMIN') {
                     navigate('/super-admin');
+                } else if (user.role === 'BRANCH_QR') {
+                    navigate('/branch-qr');
                 } else {
                     navigate('/dashboard');
                 }
@@ -103,20 +105,20 @@ const Login = () => {
                     </div>
 
                     <form onSubmit={handleLogin} className="space-y-5">
-                        {/* Email Input */}
+                        {/* Email / Username Input */}
                         <div>
-                            <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Email Address</label>
+                            <label className="block text-sm font-semibold text-slate-700 mb-1.5 ml-1">Email / Branch Username</label>
                             <div className="relative group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <Mail className="h-5 w-5 text-slate-400 group-focus-within:text-violet-600 transition-colors" />
                                 </div>
                                 <input
-                                    type="email"
+                                    type="text"
                                     name="email"
                                     value={formData.email}
                                     onChange={handleChange}
                                     className="w-full pl-11 pr-4 py-3.5 bg-slate-50/50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-violet-100 focus:border-violet-500 outline-none transition-all font-medium text-slate-700"
-                                    placeholder="admin@company.com"
+                                    placeholder="admin@company.com or branch-qr"
                                     required
                                 />
                             </div>
