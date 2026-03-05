@@ -386,8 +386,8 @@ const Settings = () => {
                                                 <button key={val}
                                                     onClick={() => setOrgSettings(p => ({ ...p, qr_refresh_interval: val }))}
                                                     className={`py-3 px-4 rounded-xl text-sm font-bold transition-all border-2 ${orgSettings.qr_refresh_interval === val
-                                                            ? 'bg-violet-600 text-white border-violet-600 shadow-lg shadow-violet-500/20'
-                                                            : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
+                                                        ? 'bg-violet-600 text-white border-violet-600 shadow-lg shadow-violet-500/20'
+                                                        : 'bg-white text-slate-600 border-slate-200 hover:border-violet-300'
                                                         }`}>
                                                     {val < 60 ? `${val}s` : `${val / 60} min`}
                                                 </button>
@@ -402,6 +402,38 @@ const Settings = () => {
                                                 />
                                                 <span className="text-sm text-slate-500">seconds</span>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    {/* QR Scan Requirement mode */}
+                                    <div className="p-6 bg-indigo-50/60 rounded-2xl border border-indigo-100">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <QrCode size={18} className="text-indigo-500" />
+                                            <h4 className="font-bold text-slate-800">QR Scan Requirement</h4>
+                                        </div>
+                                        <p className="text-xs text-slate-500 mb-4">Control whether QR attendance is enabled and if employees need to check out via QR.</p>
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                            {[
+                                                { value: 'none', icon: '🚫', label: 'Disabled', desc: 'QR attendance is turned off.' },
+                                                { value: 'check_in_only', icon: '🟢', label: 'Check-In Only', desc: 'Employees scan once to check in. No check-out required.' },
+                                                { value: 'both', icon: '🔄', label: 'Check-In & Check-Out', desc: 'Employees scan for both punch in and punch out.' }
+                                            ].map(option => {
+                                                const selected = (orgSettings.qr_attendance_mode || 'both') === option.value;
+                                                return (
+                                                    <button
+                                                        key={option.value}
+                                                        onClick={() => setOrgSettings(p => ({ ...p, qr_attendance_mode: option.value }))}
+                                                        className={`flex flex-col items-start p-4 rounded-xl border-2 text-left transition-all ${selected
+                                                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-500/20'
+                                                            : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
+                                                            }`}
+                                                    >
+                                                        <span className="text-2xl mb-2">{option.icon}</span>
+                                                        <span className={`text-sm font-bold mb-1 ${selected ? 'text-white' : 'text-slate-800'}`}>{option.label}</span>
+                                                        <span className={`text-xs ${selected ? 'text-indigo-200' : 'text-slate-400'}`}>{option.desc}</span>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     </div>
 
@@ -442,8 +474,8 @@ const Settings = () => {
                                                 <button key={mode}
                                                     onClick={() => setOrgSettings(p => ({ ...p, attendance_approver: { ...p.attendance_approver, mode } }))}
                                                     className={`px-5 py-2.5 rounded-xl text-sm font-bold capitalize transition-all border-2 ${orgSettings.attendance_approver?.mode === mode
-                                                            ? 'bg-amber-500 text-white border-amber-500'
-                                                            : 'bg-white text-slate-600 border-slate-200 hover:border-amber-300'
+                                                        ? 'bg-amber-500 text-white border-amber-500'
+                                                        : 'bg-white text-slate-600 border-slate-200 hover:border-amber-300'
                                                         }`}>
                                                     {mode === 'auto' ? '⚡ Auto-Approve' : '👤 Manual (HR/Manager)'}
                                                 </button>
