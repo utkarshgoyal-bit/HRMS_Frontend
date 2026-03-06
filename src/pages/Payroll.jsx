@@ -3,7 +3,7 @@ import axios from 'axios';
 import MainLayout from '../layouts/MainLayout';
 import { Banknote, Calendar, CheckCircle, AlertCircle, Play, FileText, Download, ChevronRight, Users, TrendingUp } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
 
 const Payroll = () => {
     const [step, setStep] = useState(1); // 1: Select, 2: Confirm, 3: Success

@@ -23,7 +23,8 @@ const Login = () => {
         setLoading(true);
 
         try {
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const rawApiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const API_URL = rawApiUrl.replace(/\/+$/, '');
             // 2. Send ONLY email and password
             const response = await axios.post(`${API_URL}/api/v1/auth/login`, {
                 email: formData.email,

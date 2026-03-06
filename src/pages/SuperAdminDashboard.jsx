@@ -32,7 +32,7 @@ const SuperAdminDashboard = () => {
         try {
             const token = localStorage.getItem('token');
             const headers = { Authorization: `Bearer ${token}` };
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
 
             const [statsRes, orgsRes] = await Promise.all([
                 axios.get(`${API_URL}/api/v1/super-admin/stats`, { headers }),
@@ -63,7 +63,7 @@ const SuperAdminDashboard = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
             await axios.delete(`${API_URL}/api/v1/super-admin/organizations/${orgId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });

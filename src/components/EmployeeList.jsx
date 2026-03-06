@@ -24,7 +24,7 @@ const EmployeeList = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
             const response = await axios.get(`${API_URL}/api/v1/employees`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -109,7 +109,7 @@ const EmployeeList = () => {
         if (!window.confirm('Are you sure you want to delete this employee? This action cannot be undone.')) return;
         try {
             const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
             await axios.delete(`${API_URL}/api/v1/employees/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });

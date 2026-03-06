@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import { MapPin, Send, CheckCircle, XCircle, AlertTriangle, Loader2, QrCode } from 'lucide-react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
 
 const QRScan = () => {
     const { token } = useParams();

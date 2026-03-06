@@ -86,7 +86,7 @@ const AddBranchModal = ({ isOpen, onClose, onSuccess, branches = [] }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999'; // Define API_URL
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
             const payload = formData; // Use formData as payload
             const res = await axios.post( // Changed 'response' to 'res'
                 `${API_URL}/api/v1/branches`, // Use API_URL

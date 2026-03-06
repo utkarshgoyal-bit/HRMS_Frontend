@@ -16,7 +16,7 @@ const BranchList = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
             const response = await axios.get(`${API_URL}/api/v1/branches`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -28,7 +28,7 @@ const BranchList = () => {
             // Get current user's role
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
-                const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+                const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
                 const empResponse = await axios.get(`${API_URL}/api/v1/employees`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -74,7 +74,7 @@ const BranchList = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
             await axios.delete(`${API_URL}/api/v1/branches/${branchId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });

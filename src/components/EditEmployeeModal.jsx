@@ -33,7 +33,7 @@ const EditEmployeeModal = ({ isOpen, onClose, onSuccess, employee }) => {
     const fetchBranches = async () => {
         try {
             const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
             const res = await axios.get(`${API_URL}/api/v1/branches`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -119,7 +119,7 @@ const EditEmployeeModal = ({ isOpen, onClose, onSuccess, employee }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
 
             const response = await axios.put(`${API_URL}/api/v1/employees/${employee._id}`,
                 formData,

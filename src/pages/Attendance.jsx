@@ -4,7 +4,7 @@ import { QrCode, Clock, CheckCircle, XCircle, Users, Filter, RefreshCw, MapPin, 
 import { QRCodeSVG } from 'qrcode.react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
 
 const Attendance = () => {
     const [activeTab, setActiveTab] = useState('qr');

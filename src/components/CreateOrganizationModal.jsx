@@ -92,7 +92,7 @@ const CreateOrganizationModal = ({ isOpen, onClose, onSuccess }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
             const res = await axios.post(
                 `${API_URL}/api/v1/super-admin/organizations`,
                 formData,

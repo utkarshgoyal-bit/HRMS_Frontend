@@ -5,7 +5,7 @@ import {
     Navigation, Key, Check, Copy, AlertCircle, ChevronDown, ChevronRight, Crown, GitBranch
 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
 
 // ============================================================
 // Build a tree from a flat array of branches

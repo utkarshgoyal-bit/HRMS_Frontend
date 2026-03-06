@@ -61,7 +61,7 @@ const BulkUploadModal = ({ isOpen, onClose, onSuccess }) => {
 
                     const token = localStorage.getItem('token');
                     // Use environment variable or fallback
-                    const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+                    const API_URL = (import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999').replace(/\/+$/, '');
 
                     const response = await axios.post(`${API_URL}/api/v1/employees/bulk`,
                         { employees },
