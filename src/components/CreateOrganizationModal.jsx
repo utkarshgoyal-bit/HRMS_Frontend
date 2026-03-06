@@ -92,14 +92,15 @@ const CreateOrganizationModal = ({ isOpen, onClose, onSuccess }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(
-                'http://127.0.0.1:9999/api/v1/super-admin/organizations',
+            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const res = await axios.post(
+                `${API_URL}/api/v1/super-admin/organizations`,
                 formData,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            if (response.data.success) {
-                setSuccess(response.data.data);
+            if (res.data.success) {
+                setSuccess(res.data.data);
             }
         } catch (err) {
             console.error(err);
@@ -173,8 +174,8 @@ const CreateOrganizationModal = ({ isOpen, onClose, onSuccess }) => {
                                 key={s.num}
                                 onClick={() => setStep(s.num)}
                                 className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${step === s.num
-                                        ? 'bg-violet-100 text-violet-700'
-                                        : 'text-slate-500 hover:text-slate-700'
+                                    ? 'bg-violet-100 text-violet-700'
+                                    : 'text-slate-500 hover:text-slate-700'
                                     }`}
                             >
                                 <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step === s.num ? 'bg-violet-600 text-white' : 'bg-slate-200 text-slate-600'
@@ -281,8 +282,8 @@ const CreateOrganizationModal = ({ isOpen, onClose, onSuccess }) => {
                                     <label
                                         key={mod.key}
                                         className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${formData.modules[mod.key]
-                                                ? 'border-violet-500 bg-violet-50'
-                                                : 'border-slate-200 hover:border-slate-300'
+                                            ? 'border-violet-500 bg-violet-50'
+                                            : 'border-slate-200 hover:border-slate-300'
                                             }`}
                                     >
                                         <div className="flex items-start gap-3">

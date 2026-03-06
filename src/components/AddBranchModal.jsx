@@ -86,21 +86,28 @@ const AddBranchModal = ({ isOpen, onClose, onSuccess, branches = [] }) => {
 
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.post(
-                'http://127.0.0.1:9999/api/v1/branches',
-                formData,
+            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999'; // Define API_URL
+            const payload = formData; // Use formData as payload
+            const res = await axios.post( // Changed 'response' to 'res'
+                `${API_URL}/api/v1/branches`, // Use API_URL
+                payload,
                 { headers: { Authorization: `Bearer ${token}` } }
             );
 
-            if (response.data.success) {
-                onSuccess();
-                onClose();
+            if (res.data.success) {
+                // If branch has generated credentials, store them to show
+                if (res.data.credentials) {
+                    setGeneratedCreds(res.data.credentials);
+                } else {
+                    onSuccess();
+                    onClose();
+                }
             }
+            setLoading(false); // Moved setLoading here as per instruction
         } catch (err) {
             console.error(err);
             setError(err.response?.data?.message || 'Failed to create branch');
-        } finally {
-            setLoading(false);
+            setLoading(false); // Ensure loading is reset on error
         }
     };
 

@@ -24,7 +24,8 @@ const EmployeeList = () => {
         setLoading(true);
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://127.0.0.1:9999/api/v1/employees', {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            const response = await axios.get(`${API_URL}/api/v1/employees`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             if (response.data.success) {

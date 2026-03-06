@@ -32,10 +32,11 @@ const SuperAdminDashboard = () => {
         try {
             const token = localStorage.getItem('token');
             const headers = { Authorization: `Bearer ${token}` };
+            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
 
             const [statsRes, orgsRes] = await Promise.all([
-                axios.get('http://127.0.0.1:9999/api/v1/super-admin/stats', { headers }),
-                axios.get('http://127.0.0.1:9999/api/v1/super-admin/organizations', { headers })
+                axios.get(`${API_URL}/api/v1/super-admin/stats`, { headers }),
+                axios.get(`${API_URL}/api/v1/super-admin/organizations`, { headers })
             ]);
 
             if (statsRes.data.success) setStats(statsRes.data.data);
@@ -58,11 +59,12 @@ const SuperAdminDashboard = () => {
     }, []);
 
     const handleSuspend = async (orgId) => {
-        if (!window.confirm('Are you sure you want to suspend this organization?')) return;
+        if (!window.confirm('Are you absolutely sure you want to delete this organization? All data will be lost.')) return;
 
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://127.0.0.1:9999/api/v1/super-admin/organizations/${orgId}`, {
+            const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:9999';
+            await axios.delete(`${API_URL}/api/v1/super-admin/organizations/${orgId}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             fetchData();
