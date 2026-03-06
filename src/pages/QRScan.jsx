@@ -142,7 +142,7 @@ const QRScan = () => {
                             {/* Submit */}
                             <button
                                 type="submit"
-                                disabled={loading || locating || !location}
+                                disabled={loading}
                                 className="w-full py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-violet-500/30 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {loading ? (
